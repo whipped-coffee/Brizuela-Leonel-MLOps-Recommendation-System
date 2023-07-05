@@ -5,7 +5,7 @@
 # <h1 align=center>**`Machine Learning Operations (MLOps)`**</h1>
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/67664604/217914153-1eb00e25-ac08-4dfa-aaf8-53c09038f082.png"  height=300>
+<img src="_src\assets\MLOps.png"  height=300>
 </p>
 
 ¡Bienvenidos al primer proyecto individual de la etapa de labs! En esta ocasión, deberán hacer un trabajo situándose en el rol de un ***MLOps Engineer***.  
@@ -30,7 +30,7 @@ Vas a sus datos y te das cuenta que la madurez de los mismos es poca (ok, es nul
 Debes empezar desde 0, haciendo un trabajo rápido de **`Data Engineer`** y tener un **`MVP`** (_Minimum Viable Product_) para el cierre del proyecto! Tu cabeza va a explotar 🤯, pero al menos sabes cual es, conceptualmente, el camino que debes de seguir :exclamation:. Así que te espantas los miedos y te pones manos a la obra :muscle:
 
 <p align="center">
-<img src="https://github.com/HX-PRomero/PI_ML_OPS/raw/main/src/DiagramaConceptualDelFlujoDeProcesos.png"  height=500>
+<img src="_src\assets\DiagramaConceptualDelFlujoDeProcesos.png"  height=500>
 </p>
 
 <sub> Nota que aqui se reflejan procesos no herramientas tecnologicas. Has el ejercicio de entender cual herramienta del stack corresponde a cual parte del proceso<sub/>
@@ -139,7 +139,7 @@ Aqui te sintetizamos que es lo que consideramos un MVP aprobatorio, y la diferen
 
 
 <p align="center">
-<img src="https://github.com/HX-PRomero/PI_ML_OPS/raw/main/src/MVP_MLops.PNG"  height=250>
+<img src="_src\assets\MVP_MLops.PNG"  height=250>
 </p>
 
 

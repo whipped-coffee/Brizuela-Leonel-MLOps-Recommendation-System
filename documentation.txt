@@ -1,0 +1,33 @@
+-FastAPI (requirements)
+	-In the directory where you have your project, open the terminal
+>cd directory of our project
+
+	-Initialize a virtual enviroment in python
+>python -m venv name_of_enviroment-env
+
+	-Once created it, you need to activate it, to do this you utilize the command:
+
+Windows with gitbash:
+>name_of_enviroment-env/Scripts/activate.bat
+
+Unix or MacOS:
+>source name_of_enviroment-env/bin/activate
+
+	-Now you have to install FastAPI in your enviroment
+>pip install fastapi
+
+	-Once installed fastapi you have to install uvicorn because it will act as a ASGI server for production
+>pip install uvicorn
+
+	-Ubicate in your project directory an create a main.py
+
+FastAPI (implementation: recomend to see the scripts provided in the repository)
+	
+	-Once ubicated in the main.py import the fastapi module and initialize it
+
+	-Create the API route to communicate with the server
+
+	-We need to run the server to work with the API interface
+-In terminal:
+>uvicorn main:app --reload
+	
