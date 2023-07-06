@@ -1,5 +1,6 @@
 import pandas as pd
 from fastapi import FastAPI
+import re
 
 app = FastAPI()
 
@@ -17,60 +18,90 @@ def index():
             } 
     return text
 
-@app.get('/movies_in_language/{language}')
+@app.get('/peliculas_idioma/{language}')
 def movies_in_language(language: str):
-    data = pd.read_csv('_src/data/movies_normalized.csv', usecols=['release_language','id'])
-    movie_counts = {f'count movies produced in {language}': data.loc[data['release_language'] == str(language), 'id'].count().item()}
-    return movie_counts
+    try:
+        data = pd.read_csv('_src/data/movies_transformed.csv', usecols=['original_language','id'])
+        data.loc[data['original_language'].isna(), 'original_language'] = 'None'
+        movie_counts = {f'movies count produced in {language}': len(data.loc[data['original_language'] == language, 'id'].unique())}
+        
+        return movie_counts
+    except:
+        return 'There is not any movie with that name'
 
-@app.get('/movie_runtime/{movie}')
+@app.get('/peliculas_duracion/{movie}')
 def movie_runtime(movie: str):
-    data = pd.read_csv('_src/data/movies_normalized.csv', usecols=['title','runtime','release_year'])
-    movie_data = {'movie': movie,
-                  'runtime': data.loc[data['title'] == movie, 'runtime'].values[0].astype(int).item(),
-                  'release_year': data.loc[data['title'] == movie, 'release_year'].values[0].item()}
-    return movie_data
+    data = pd.read_csv('_src/data/movies_transformed.csv', usecols=['title','runtime','release_year'])
+    data.loc[data['title'].isna(), 'title'] = 'None'
+    movie_data = []
+    try:
+        for i in range(data.loc[data['title'] == movie, 'title'].shape[0]):
+            movie_data.append([])
+            movie_data[i] = {'movie': data.loc[data['title'] == movie, 'title'].values[i],
+                    'runtime': data.loc[data['title'] == movie, 'runtime'].values[i].astype(int).item(),
+                    'release_year': data.loc[data['title'] == movie, 'release_year'].values[i].item()}
+        return movie_data
+    except:
+        return 'There is not any movie with that name'
 
-@app.get('/collection/{movie}')
+@app.get('/franquicia/{movie}')
 def collection(movie: str):
-    data = pd.read_csv('_src/data/movies_normalized.csv', usecols=['collection_name','id','revenue'])
-    if (data.loc[data['collection_name'].str.contains(str(movie), regex=True)].shape[0] > 1):
-        collection_data = {'collection': data.loc[data['collection_name'].str.contains(str(movie), regex=True), 'collection_name'].values[1],
-                      'count_movies': data.loc[data['collection_name'].str.contains(str(movie), regex=True), 'id'].count().item(),
-                      'total_revenue': data.loc[data['collection_name'].str.contains(str(movie), regex=True), 'revenue'].sum().item(),
-                      'mean_revenue': data.loc[data['collection_name'].str.contains(str(movie), regex=True), 'revenue'].mean().item()}
-        return collection_data    
-    else: return ('The movie you selected its not part of a collection.')
+    regex = re.compile(movie, re.IGNORECASE) # Make the condition case insensitive
+    data = pd.read_csv('_src/data/movies_transformed.csv', usecols=['collection_name','id','revenue'])
+    try:
+        collection_data = {'collection': data.loc[data['collection_name'].str.contains(regex, regex=True), 'collection_name'].values[1],
+                      'count_movies': data.loc[data['collection_name'].str.contains(regex, regex=True), 'id'].count().item(),
+                      'total_gain': data.loc[data['collection_name'].str.contains(regex, regex=True), 'revenue'].sum().item(),
+                      'mean_gain': data.loc[data['collection_name'].str.contains(regex, regex=True), 'revenue'].mean().item()}
+        return collection_data
+    except:
+        return 'The inputed movie its not part of a collection.'
 
-@app.get('/movies_in_country/{country}')
+@app.get('/peliculas_pais/{country}')
 def movies_per_country(country: str):
-    data = pd.read_csv('_src/data/movies_normalized.csv', usecols=['prod_country','id'])
-    country_data = {f'total of movies produced in {country}': data.loc[data['prod_country'] == str(country), 'id'].count().item()}
-    return country_data
+    data = pd.read_csv('_src/data/movies_transformed.csv', usecols=['prod_countries','id'])
+    data.loc[data['prod_countries'].isna(), 'prod_countries'] = 'None'
+    regex = re.compile(country, re.IGNORECASE)
+    try:
+        movie_counts = data.loc[data['prod_countries'].str.contains(regex, regex=True), 'id'].count().item() 
+        country_data = {f'total of movies produced in {country}': movie_counts}
+        return country_data
+    except:
+        return 'There is not any movie made in the inputed country'
 
-@app.get('/prod_company_success/{company}')
+@app.get('/productoras_exitosas/{company}')
 def prod_company_success(company: str):
-    data = pd.read_csv('_src/data/movies_normalized.csv', usecols=['prod_companies','id','revenue'])
+    regex = re.compile(company, re.IGNORECASE)
+    data = pd.read_csv('_src/data/movies_transformed.csv', usecols=['prod_companies','id','revenue'])
     data.loc[data['prod_companies'].isna(), 'prod_companies'] = 'None'
-    company_data = {'company': company,
-                  'total_movies': data.loc[data['prod_companies'].str.contains(str(company), regex=True), 'id'].count().item(),
-                  'total_revenue': data.loc[data['prod_companies'].str.contains(str(company), regex=True), 'revenue'].sum().item()}
-    return company_data
+    try:
+        company_data = {'company': company,
+                    'total_movies': data.loc[data['prod_companies'].str.contains(regex, regex=True), 'id'].count().item(),
+                    'total_revenue': data.loc[data['prod_companies'].str.contains(regex, regex=True), 'revenue'].sum().item()}
+        return company_data
+    except:
+        return {'There is no company with the name that you ingresed in the database'}
 
-@app.get('/director_data/{director}')
+@app.get('/get_director/{director}')
 def director_data(director: str):
-    data = pd.read_csv('_src/data/movies_normalized.csv', usecols=['title', 'release_date', 'budget', 'revenue', 'return','director'])
-    movies_data_list = []
-    movies_data_list = [['title', 'release_date', 'budget', 'revenue', 'return']]
-    for i in range(data.loc[data['director'] == str(director), 'title'].shape[0]):
-        movies_data_list.append([])
-        movies_data_list[i] = {'title': data.loc[data['director'] == str(director), 'title'].values[i],
-                                 'release_date': data.loc[data['director'] == str(director), 'release_date'].values[i],
-                                 'budget': str(data.loc[data['director'] == str(director), 'budget'].values[i]),
-                                 'revenue': str(data.loc[data['director'] == str(director), 'revenue'].values[i]),
-                                 'return': str(data.loc[data['director'] == str(director), 'return'].values[i])}
-        director_data = {'director':str(director),
-                         'total_movies_return': str(round(data.loc[data['director'] == str(director), 'return'].sum().item(),2)),
-                         'produced_movies': movies_data_list}
-    return(director_data)     
+    data = pd.read_csv('_src/data/movies_transformed.csv', usecols=['title', 'release_date', 'budget', 'revenue', 'return','directors'])
+    data.loc[data['directors'].isna(), 'directors'] = 'None'
+    regex = re.compile(director, re.IGNORECASE)
+    try:
+        movies_data_list = []
+        movies_data_list = [['title', 'release_date', 'budget', 'revenue', 'return']]
+        for i in range(data.loc[data['directors'].str.contains(regex, regex=True), 'title'].shape[0]):
+            movies_data_list.append([])
+            movies_data_list[i] = {'title': data.loc[data['directors'].str.contains(regex, regex=True), 'title'].values[i],
+                                    'release_date': data.loc[data['directors'].str.contains(regex, regex=True), 'release_date'].values[i],
+                                    'budget': str(data.loc[data['directors'].str.contains(regex, regex=True), 'budget'].values[i]),
+                                    'revenue': str(data.loc[data['directors'].str.contains(regex, regex=True), 'revenue'].values[i]),
+                                    'return': str(data.loc[data['directors'].str.contains(regex, regex=True), 'return'].values[i])}
+            director_data = {'director':director,
+                            'total_movies_return': str(round(data.loc[data['directors'].str.contains(regex, regex=True), 'return'].sum().item(),2)),
+                            'produced_movies': movies_data_list}
+        return director_data
+    except:
+        return 'There is no director with that name'  
+ 
 
