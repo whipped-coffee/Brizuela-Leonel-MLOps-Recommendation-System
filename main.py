@@ -1,8 +1,18 @@
 import pandas as pd
-from fastapi import FastAPI
+import joblib
 import re
+from fastapi import FastAPI
+
 
 app = FastAPI()
+
+#Load the movie_data
+data = pd.read_csv('_src/data/movies_transformed.csv')
+model_data = pd.read_csv('_src/data/model_data.csv')
+reduced_data = model_data.head(10000)
+
+# load the compressed cosine similarity matrix
+cosine_sim = joblib.load('_src/data/cosine_sim.pkl')
 
 @app.get('/') # .get(server:port), '/' because its localhost
 def index():
@@ -14,25 +24,22 @@ def index():
             'collection(movie)':'Returns the collection name, total_revenue and mean_revenue of the given movie',
             'movies_in_country(country)':'Returns the count of movies made in that country',
             'prod_company_success(company)':'Returns company_name, total_movies made by that company, and the total_revenue',
-            'director_data(director)':'returns the director_name, total_movies made by that director, the information of each movie'
+            'director_data(director)':'returns the director_name, total_movies made by that director, and the information of each produced movie'
             } 
     return text
 
 @app.get('/peliculas_idioma/{language}')
 def movies_in_language(language: str):
-    try:
-        data = pd.read_csv('_src/data/movies_transformed.csv', usecols=['original_language','id'])
-        data.loc[data['original_language'].isna(), 'original_language'] = 'None'
-        movie_counts = {f'movies count produced in {language}': len(data.loc[data['original_language'] == language, 'id'].unique())}
-        
+    try:       
+        data['original_language'].fillna('', inplace = True)
+        movie_counts = {f'movies count produced in {language}': len(data.loc[data['original_language'] == language, 'id'].unique())}       
         return movie_counts
     except:
         return 'There is not any movie with that name'
 
 @app.get('/peliculas_duracion/{movie}')
 def movie_runtime(movie: str):
-    data = pd.read_csv('_src/data/movies_transformed.csv', usecols=['title','runtime','release_year'])
-    data.loc[data['title'].isna(), 'title'] = 'None'
+    data['title'].fillna('', inplace = True)
     movie_data = []
     try:
         for i in range(data.loc[data['title'] == movie, 'title'].shape[0]):
@@ -44,23 +51,22 @@ def movie_runtime(movie: str):
     except:
         return 'There is not any movie with that name'
 
-@app.get('/franquicia/{movie}')
-def collection(movie: str):
-    regex = re.compile(movie, re.IGNORECASE) # Make the condition case insensitive
-    data = pd.read_csv('_src/data/movies_transformed.csv', usecols=['collection_name','id','revenue'])
+@app.get('/franquicia/{franchise}')
+def collection(franchise: str):
+    data['collection_name'].fillna('', inplace=True)
+    regex = re.compile(franchise, re.IGNORECASE) # Make the condition case insensitive
     try:
-        collection_data = {'collection': data.loc[data['collection_name'].str.contains(regex, regex=True), 'collection_name'].values[1],
-                      'count_movies': data.loc[data['collection_name'].str.contains(regex, regex=True), 'id'].count().item(),
+        franchise_data = {'collection': data.loc[data['collection_name'].str.contains(regex, regex=True), 'collection_name'].values[1],
+                      'count_collections': data.loc[data['collection_name'].str.contains(regex, regex=True), 'id'].count().item(),
                       'total_gain': data.loc[data['collection_name'].str.contains(regex, regex=True), 'revenue'].sum().item(),
                       'mean_gain': data.loc[data['collection_name'].str.contains(regex, regex=True), 'revenue'].mean().item()}
-        return collection_data
+        return franchise_data
     except:
-        return 'The inputed movie its not part of a collection.'
+        return 'The inputed collection its not part of a collection.'
 
 @app.get('/peliculas_pais/{country}')
 def movies_per_country(country: str):
-    data = pd.read_csv('_src/data/movies_transformed.csv', usecols=['prod_countries','id'])
-    data.loc[data['prod_countries'].isna(), 'prod_countries'] = 'None'
+    data['prod_countries'].fillna('', inplace = True)
     regex = re.compile(country, re.IGNORECASE)
     try:
         movie_counts = data.loc[data['prod_countries'].str.contains(regex, regex=True), 'id'].count().item() 
@@ -72,8 +78,7 @@ def movies_per_country(country: str):
 @app.get('/productoras_exitosas/{company}')
 def prod_company_success(company: str):
     regex = re.compile(company, re.IGNORECASE)
-    data = pd.read_csv('_src/data/movies_transformed.csv', usecols=['prod_companies','id','revenue'])
-    data.loc[data['prod_companies'].isna(), 'prod_companies'] = 'None'
+    data['prod_companies'].fillna('', inplace = True)
     try:
         company_data = {'company': company,
                     'total_movies': data.loc[data['prod_companies'].str.contains(regex, regex=True), 'id'].count().item(),
@@ -84,24 +89,41 @@ def prod_company_success(company: str):
 
 @app.get('/get_director/{director}')
 def director_data(director: str):
-    data = pd.read_csv('_src/data/movies_transformed.csv', usecols=['title', 'release_date', 'budget', 'revenue', 'return','directors'])
-    data.loc[data['directors'].isna(), 'directors'] = 'None'
+    data['directors'].fillna('', inplace = True)
     regex = re.compile(director, re.IGNORECASE)
     try:
         movies_data_list = []
-        movies_data_list = [['title', 'release_date', 'budget', 'revenue', 'return']]
-        for i in range(data.loc[data['directors'].str.contains(regex, regex=True), 'title'].shape[0]):
+        movies_data_list = []
+        director_df = data.loc[data['directors'].str.contains(regex, regex=True)].values
+        for i in range(len(director_df)):
             movies_data_list.append([])
-            movies_data_list[i] = {'title': data.loc[data['directors'].str.contains(regex, regex=True), 'title'].values[i],
-                                    'release_date': data.loc[data['directors'].str.contains(regex, regex=True), 'release_date'].values[i],
-                                    'budget': str(data.loc[data['directors'].str.contains(regex, regex=True), 'budget'].values[i]),
-                                    'revenue': str(data.loc[data['directors'].str.contains(regex, regex=True), 'revenue'].values[i]),
-                                    'return': str(data.loc[data['directors'].str.contains(regex, regex=True), 'return'].values[i])}
-            director_data = {'director':director,
+            movies_data_list[i] = {'title': director_df[i][4],
+                                    'release_date': director_df[i][10],
+                                    'budget': str(director_df[i][17]),
+                                    'revenue': str(director_df[i][18]),
+                                    'return': str(director_df[i][19])}
+            director_data = {'director':regex,
                             'total_movies_return': str(round(data.loc[data['directors'].str.contains(regex, regex=True), 'return'].sum().item(),2)),
                             'produced_movies': movies_data_list}
-        return director_data
+        return(director_data)
     except:
-        return 'There is no director with that name'  
- 
+         return('There is no director with that name')
+    
+@app.get('/recomendacion/{title}')
+def recommendation(title: str):
 
+    index = reduced_data[reduced_data['title'] == title].index[0]
+    #Make a index-similarity matrix
+    sim_scores = list(enumerate(cosine_sim[index]))
+    #Sort the scores in descending order
+    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+    #Recomend the first 5 movies with the most similarity
+    top_recommendations = []
+    for i in range(1,6):
+        top_recommendations.append([])
+        top_recommendations[i-1] = {'title':reduced_data.iloc[sim_scores[i][0]].title, 
+                            'vote_average': str(reduced_data.iloc[sim_scores[i][0]].vote_average), 
+                            'genres_list': reduced_data.iloc[sim_scores[i][0]].genres_list,
+                            'directors': reduced_data.iloc[sim_scores[i][0]].directors}
+
+    return {"title": str(title), "recommendations": top_recommendations}
