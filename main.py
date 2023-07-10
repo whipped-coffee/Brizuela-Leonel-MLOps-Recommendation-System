@@ -9,7 +9,6 @@ app = FastAPI()
 #Load the movie_data
 data = pd.read_csv('_src/data/movies_transformed.csv')
 model_data = pd.read_csv('_src/data/model_data.csv')
-reduced_data = model_data.head(6000)
 
 # load the compressed cosine similarity matrix
 cosine_sim = joblib.load('_src/data/cosine_sim.pkl')
@@ -111,7 +110,7 @@ def director_data(director: str):
     
 @app.get('/recomendacion/{title}')
 def recommendation(title: str):
-    index = reduced_data[reduced_data['title'] == title].index[0]
+    index = model_data[model_data['title'] == title].index[0]
     #Make a index-similarity matrix
     sim_scores = list(enumerate(cosine_sim[index]))
     #Sort the scores in descending order
@@ -120,8 +119,8 @@ def recommendation(title: str):
     top_recommendations = []
     for i in range(1,6):
         top_recommendations.append([])
-        top_recommendations[i-1] = {'title':reduced_data.iloc[sim_scores[i][0]].title, 
-                            'vote_average': str(reduced_data.iloc[sim_scores[i][0]].vote_average), 
-                            'genres_list': reduced_data.iloc[sim_scores[i][0]].genres_list,
-                            'directors': reduced_data.iloc[sim_scores[i][0]].directors}
+        top_recommendations[i-1] = {'title':model_data.iloc[sim_scores[i][0]].title, 
+                            'vote_average': str(model_data.iloc[sim_scores[i][0]].vote_average), 
+                            'genres_list': model_data.iloc[sim_scores[i][0]].genres_list,
+                            'directors': model_data.iloc[sim_scores[i][0]].directors}
     return {"title": str(title), "recommendations": top_recommendations}
