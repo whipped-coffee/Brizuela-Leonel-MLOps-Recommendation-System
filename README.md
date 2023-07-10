@@ -15,7 +15,7 @@ In this project, I assume the role of a Data Scientist working for a start-up th
 
 ## Objectives:
 
-1. **Development of 6 APIs that process functions and respond to data queries related to movies.**
+1. **Development of APIs that process functions and respond to data queries related to movies.**
 
 2. **Development of a content-based recommendation system model**
 
