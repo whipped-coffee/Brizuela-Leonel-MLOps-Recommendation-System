@@ -29,9 +29,10 @@ def index():
 
 @app.get('/peliculas_idioma/{language}')
 def movies_in_language(language: str):
+    regex = re.compile(language, re.IGNORECASE) # Make the condition case insensitive
     try:       
         data['original_language'].fillna('', inplace = True)
-        movie_counts = {f'movies count produced in {language}': len(data.loc[data['original_language'] == language, 'id'].unique())}       
+        movie_counts = {f'movies count produced in {language}': len(data.loc[data['original_language'].str.contains(regex, regex=True), 'id'].unique())}       
         return movie_counts
     except:
         return 'There is not any movie with that name'
@@ -53,7 +54,7 @@ def movie_runtime(movie: str):
 @app.get('/franquicia/{franchise}')
 def collection(franchise: str):
     data['collection_name'].fillna('', inplace=True)
-    regex = re.compile(franchise, re.IGNORECASE) # Make the condition case insensitive
+    regex = re.compile(franchise, re.IGNORECASE) 
     try:
         franchise_data = {'collection': data.loc[data['collection_name'].str.contains(regex, regex=True), 'collection_name'].values[1],
                       'count_collections': data.loc[data['collection_name'].str.contains(regex, regex=True), 'id'].count().item(),
