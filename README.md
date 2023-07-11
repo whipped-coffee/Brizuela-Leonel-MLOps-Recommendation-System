@@ -10,12 +10,12 @@
 <h2 align = 'center'> Introduction </h2>
 
 <p align = 'center'>
-In this project, I assume the role of a Data Scientist working for a start-up that provides aggregation systems for streaming platforms. My responsibility is to oversee the entire process, from data gathering to the development and training of a content-based recommendation system model.
+In this project, I assume the role of a Data Scientist working for a start-up that provides aggregation systems for streaming platforms. My responsibility is to realize the entire process, from data gathering to the development and training of a content-based recommendation system model.
 </p>    
 
 ## Objectives:
 
-1. **Development of 6 APIs that process functions and respond to data queries related to movies.**
+1. **Development of APIs that process functions and respond to data queries related to movies.**
 
 2. **Development of a content-based recommendation system model**
 
