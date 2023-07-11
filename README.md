@@ -24,8 +24,8 @@ In this project, I assume the role of a Data Scientist working for a start-up th
 ## Extract, Transform & Load: [ETL.ipynb](https://github.com/whipped-coffee/Brizuela-Leonel-MLOps-Recommendation-System/blob/main/ETL.ipynb)
 ### In this file is the entire process of extracting, transformating and loading of the data obtained from the datasets. With the goal of preparing it for its future consumption. Such as mergin DataFrames, Unnesting data and Creation of aggregated columns
 
-## Exploratory Data Analysis: [EDA.ipynb](https://github.com/whipped-coffee/Brizuela-Leonel-MLOps-Recommendation-System/blob/main/EDA.ipynb) 
-### In this file is the entire process of the Exploratory Data Analysis with its respective documentation. This include: Handling the missing values, correlation matrix visualization and plotting of the distribution between the important features
+## Exploratory Data Analysis and Modeling: [EDA.ipynb](https://github.com/whipped-coffee/Brizuela-Leonel-MLOps-Recommendation-System/blob/main/EDA.ipynb) 
+### In this file is the entire process of the Exploratory Data Analysis with its respective documentation. This include: Handling the missing values, correlation matrix visualization and plotting of the distribution between the important features. And the process of modeling the content-based recommendation system using cosine similarity.
 
 ## APIs functions: [main.py](https://github.com/whipped-coffee/Brizuela-Leonel-MLOps-Recommendation-System/blob/main/main.py)
 ### In this file we have the creation of a FastAPI system that can be consumed by the Data Analysis department, or a final user. It contains:
@@ -56,9 +56,10 @@ In this project, I assume the role of a Data Scientist working for a start-up th
 ## Considerations:
 + peliculas_duracion and recomendacion are case sensitive
 + recomendacion does not have all the movies because I had to reduce it to make the deploy
-
++ Deploy: https://mlops-movie-recommendation-system.onrender.com/
 ## Made by:
 ### Name: Brizuela Leonel Ariel
 ### GitHub: https://github.com/whipped-coffee
 ### Linkedin: https://www.linkedin.com/in/leonel-brizuela-30b80524a/
 ### Gmail: leonelbrizuela159357@gmail.com
+
